@@ -11,4 +11,7 @@ jobs:
       - name: Checkout code
         uses: actions/checkout@v3
 
+      - name: Print message
+        run: echo "Triggered manually on main branch ✅"  
+
       # Add your Docker build and push steps here
