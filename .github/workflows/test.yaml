@@ -1,0 +1,14 @@
+name: Build and Push Docker Image to ECR
+
+on:
+  workflow_dispatch:  # enables manual trigger
+
+jobs:
+  build-and-push:
+    if: github.ref == 'refs/heads/main'  # ensures it only runs if main is selected
+    runs-on: ubuntu-latest
+    steps:
+      - name: Checkout code
+        uses: actions/checkout@v3
+
+      # Add your Docker build and push steps here
