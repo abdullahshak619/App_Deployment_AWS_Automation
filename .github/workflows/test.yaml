@@ -1,17 +1,24 @@
-name: Build and Push Docker Image to ECR
+name: Deploy with OIDC
 
 on:
-  workflow_dispatch:  # enables manual trigger
+  workflow_dispatch:
 
 jobs:
-  build-and-push:
-    if: github.ref == 'refs/heads/main'  # ensures it only runs if main is selected
+  deploy:
     runs-on: ubuntu-latest
+    permissions:
+      id-token: write    # Required for OIDC
+      contents: read     # Required to checkout the repo
+
     steps:
-      - name: Checkout code
+      - name: Checkout
         uses: actions/checkout@v3
 
-      - name: Print message
-        run: echo "Triggered manually on main branch ✅"  
+      - name: Configure AWS credentials using OIDC
+        uses: aws-actions/configure-aws-credentials@v4
+        with: 
+          role-to-assume: arn:aws:iam::171171308751:role/github-action  # Replace with your real role ARN
+          aws-region: us-east-1
 
-      # Add your Docker build and push steps here
+      - name: Deploy
+        run: aws s3 ls  # Example command. Replace with your real deployment command (e.g., Terraform, ECS, etc.)
