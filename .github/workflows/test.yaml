@@ -28,7 +28,11 @@ jobs:
       - name: Initialize Terraform
         run: |
           cd Terraform
-          terraform init    
+          terraform init  
+
+      - name: Terraform Validate
+        run: terraform validate
+        working-directory: Terraform    
 
       - name: Terraform Plan
         run: terraform plan 
