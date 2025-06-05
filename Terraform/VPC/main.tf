@@ -116,6 +116,7 @@ resource "aws_instance" "example" {
   subnet_id              = aws_subnet.subnet1.id
   vpc_security_group_ids = [aws_security_group.ssh.id]
   key_name               = aws_key_pair.example.key_name
+  associate_public_ip_address = true
 
   tags = {
     Name = "CustomEC2"
