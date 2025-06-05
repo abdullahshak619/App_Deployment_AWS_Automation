@@ -27,17 +27,17 @@ jobs:
 
       - name: Initialize Terraform
         run: |
-          cd Terraform/VPC
+          cd Terraform/IAM
           terraform init  
 
       - name: Terraform Validate
         run: terraform validate
-        working-directory: Terraform/VPC 
+        working-directory: Terraform/IAM 
 
       - name: Terraform Plan
         run: terraform plan 
-        working-directory: Terraform/VPC
+        working-directory: Terraform/IAM
 
       - name: Terraform Apply
         run: terraform apply -auto-approve
-        working-directory: Terraform/VPC  
+        working-directory: Terraform/IAM  
