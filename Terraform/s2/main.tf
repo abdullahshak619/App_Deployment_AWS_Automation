@@ -3,7 +3,7 @@ provider "aws" {
 }
 
 resource "aws_s3_bucket" "tf_state" {
-  bucket = "my-terraform-state-bucket"
+  bucket = "terraform-state-bucketlko"
 }
 
 #resource "aws_dynamodb_table" "terraform_locks" {
