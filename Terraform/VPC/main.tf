@@ -2,45 +2,47 @@ provider "aws" {
   region = "us-east-1"
 }
 
-# VPC
+# Generate RSA Key Pair
+resource "tls_private_key" "example" {
+  algorithm = "RSA"
+  rsa_bits  = 4096
+}
+
+# Store private key in AWS Secrets Manager
+resource "aws_secretsmanager_secret" "ec2_private_key" {
+  name = "ec2-private-key"
+}
+
+resource "aws_secretsmanager_secret_version" "ec2_private_key_version" {
+  secret_id     = aws_secretsmanager_secret.ec2_private_key.id
+  secret_string = tls_private_key.example.private_key_pem
+}
+
+# Upload the public key to AWS EC2
+resource "aws_key_pair" "example" {
+  key_name   = "tf-keypair"
+  public_key = tls_private_key.example.public_key_openssh
+}
+
+# Create VPC
 resource "aws_vpc" "custom_vpc" {
   cidr_block = "10.0.0.0/16"
-  tags = {
-    Name = "custom-vpc"
-  }
+  tags = { Name = "custom-vpc" }
 }
 
-# Subnets
-resource "aws_subnet" "subnet_1" {
-  vpc_id                  = aws_vpc.custom_vpc.id
-  cidr_block              = "10.0.1.0/24"
-  availability_zone       = "us-east-1a"
-  map_public_ip_on_launch = true
-  tags = { Name = "custom-subnet-1" }
+# Create 2 subnets (you can duplicate to make 4)
+resource "aws_subnet" "subnet1" {
+  vpc_id            = aws_vpc.custom_vpc.id
+  cidr_block        = "10.0.1.0/24"
+  availability_zone = "us-east-1a"
+  tags = { Name = "subnet-1" }
 }
 
-resource "aws_subnet" "subnet_2" {
-  vpc_id                  = aws_vpc.custom_vpc.id
-  cidr_block              = "10.0.2.0/24"
-  availability_zone       = "us-east-1b"
-  map_public_ip_on_launch = true
-  tags = { Name = "custom-subnet-2" }
-}
-
-resource "aws_subnet" "subnet_3" {
-  vpc_id                  = aws_vpc.custom_vpc.id
-  cidr_block              = "10.0.3.0/24"
-  availability_zone       = "us-east-1c"
-  map_public_ip_on_launch = true
-  tags = { Name = "custom-subnet-3" }
-}
-
-resource "aws_subnet" "subnet_4" {
-  vpc_id                  = aws_vpc.custom_vpc.id
-  cidr_block              = "10.0.4.0/24"
-  availability_zone       = "us-east-1d"
-  map_public_ip_on_launch = true
-  tags = { Name = "custom-subnet-4" }
+resource "aws_subnet" "subnet2" {
+  vpc_id            = aws_vpc.custom_vpc.id
+  cidr_block        = "10.0.2.0/24"
+  availability_zone = "us-east-1b"
+  tags = { Name = "subnet-2" }
 }
 
 # Internet Gateway
@@ -50,52 +52,35 @@ resource "aws_internet_gateway" "igw" {
 }
 
 # Route Table
-resource "aws_route_table" "route_table" {
+resource "aws_route_table" "rt" {
   vpc_id = aws_vpc.custom_vpc.id
   route {
     cidr_block = "0.0.0.0/0"
     gateway_id = aws_internet_gateway.igw.id
   }
-  tags = { Name = "custom-route-table" }
+  tags = { Name = "custom-rt" }
 }
 
-# Associate all 4 subnets to the route table
+# Associate route table with subnets
 resource "aws_route_table_association" "rta1" {
-  subnet_id      = aws_subnet.subnet_1.id
-  route_table_id = aws_route_table.route_table.id
+  subnet_id      = aws_subnet.subnet1.id
+  route_table_id = aws_route_table.rt.id
 }
 
 resource "aws_route_table_association" "rta2" {
-  subnet_id      = aws_subnet.subnet_2.id
-  route_table_id = aws_route_table.route_table.id
+  subnet_id      = aws_subnet.subnet2.id
+  route_table_id = aws_route_table.rt.id
 }
 
-resource "aws_route_table_association" "rta3" {
-  subnet_id      = aws_subnet.subnet_3.id
-  route_table_id = aws_route_table.route_table.id
-}
-
-resource "aws_route_table_association" "rta4" {
-  subnet_id      = aws_subnet.subnet_4.id
-  route_table_id = aws_route_table.route_table.id
-}
-
-# Security Group for SSH/HTTP
+# Security Group for SSH
 resource "aws_security_group" "ssh" {
   name        = "allow-ssh"
-  description = "Allow SSH and HTTP access"
   vpc_id      = aws_vpc.custom_vpc.id
+  description = "Allow SSH"
 
   ingress {
     from_port   = 22
     to_port     = 22
-    protocol    = "tcp"
-    cidr_blocks = ["0.0.0.0/0"]
-  }
-
-  ingress {
-    from_port   = 80
-    to_port     = 80
     protocol    = "tcp"
     cidr_blocks = ["0.0.0.0/0"]
   }
@@ -106,14 +91,12 @@ resource "aws_security_group" "ssh" {
     protocol    = "-1"
     cidr_blocks = ["0.0.0.0/0"]
   }
-
-  tags = { Name = "allow-ssh" }
 }
 
-# Ubuntu AMI
+# Lookup Ubuntu AMI
 data "aws_ami" "ubuntu" {
   most_recent = true
-  owners      = ["099720109477"]
+  owners      = ["099720109477"] # Canonical
 
   filter {
     name   = "name"
@@ -126,42 +109,25 @@ data "aws_ami" "ubuntu" {
   }
 }
 
-# SSH Key Pair
-resource "tls_private_key" "example" {
-  algorithm = "RSA"
-  rsa_bits  = 4096
-}
-
-resource "aws_key_pair" "example" {
-  key_name   = "tf-keypair"
-  public_key = tls_private_key.example.public_key_openssh
-}
-
-# EC2 Instance in subnet 1
+# Launch EC2
 resource "aws_instance" "example" {
   ami                    = data.aws_ami.ubuntu.id
   instance_type          = "t2.micro"
-  subnet_id              = aws_subnet.subnet_1.id
+  subnet_id              = aws_subnet.subnet1.id
   vpc_security_group_ids = [aws_security_group.ssh.id]
   key_name               = aws_key_pair.example.key_name
 
   tags = {
-    Name = "CustomUbuntuInstance"
+    Name = "CustomEC2"
   }
 }
 
-# Output public IP
+# Output Public IP
 output "ec2_public_ip" {
   value = aws_instance.example.public_ip
 }
 
-##DONT RUN BELOW ONE IN CI/CD ,only for local
-
-# Output private key (secure this)
-#output "private_key_pem" {
-#  value     = tls_private_key.example.private_key_pem
-#  sensitive = true
-#}
-
-
-
+# Output Private Key Location
+output "private_key_secret_arn" {
+  value = aws_secretsmanager_secret.ec2_private_key.arn
+}  
