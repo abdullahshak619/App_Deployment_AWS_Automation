@@ -16,5 +16,5 @@
 resource "aws_iam_role_policy_attachment" "ec2_task_exec_policy" {
   role = "github-action"
   #role       = aws_iam_role.ecs_task_execution_role.name
-  policy_arn = "arn:aws:iam::aws:policy/service-role/AmazonEC2FullAccess"
+  policy_arn = "arn:aws:iam::aws:policy/AmazonEC2FullAccess"
 }
