@@ -67,7 +67,7 @@ resource "aws_ecs_task_definition" "nginx_task" {
   requires_compatibilities = ["FARGATE"]
   cpu                      = "256"
   memory                   = "512"
-  execution_role_arn       = aws_iam_role.ecs_task_execution_role.arn
+  execution_role_arn       = arn:aws:iam::171171308751:role/github-action
 
   container_definitions = jsonencode([
     {
