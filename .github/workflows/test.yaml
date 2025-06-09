@@ -27,17 +27,17 @@ jobs:
 
       - name: Initialize Terraform
         run: |
-          cd Terraform/ecs
+          cd Terraform/all
           terraform init  
 
       - name: Terraform Validate
         run: terraform validate
-        working-directory: Terraform/ecs
+        working-directory: Terraform/all
 
       - name: Terraform Plan
         run: terraform plan 
-        working-directory: Terraform/ecs
+        working-directory: Terraform/all
 
       - name: Terraform Apply
         run: terraform apply -auto-approve
-        working-directory: Terraform/ecs  
+        working-directory: Terraform/all  
