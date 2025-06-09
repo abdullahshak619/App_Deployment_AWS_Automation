@@ -15,7 +15,7 @@ provider "aws" {
 # S3 BUCKET FOR TERRAFORM STATE
 ###########################
 resource "aws_s3_bucket" "example" {
-  bucket        = "my-aut-bu3cket-name-12456" # Must be globally unique
+  bucket        = "my-aut-bu3ecket-name-12456" # Must be globally unique
   force_destroy = true
 
   tags = {
