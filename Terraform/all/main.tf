@@ -197,7 +197,7 @@ resource "tls_private_key" "example" {
 }
 
 resource "aws_secretsmanager_secret" "ec2_private_key" {
-  name = "ec2-private-key"
+  name = "ec2-private-key-alt"
 }
 
 resource "aws_secretsmanager_secret_version" "ec2_private_key_version" {
