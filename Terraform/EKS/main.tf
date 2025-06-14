@@ -27,21 +27,25 @@ resource "aws_internet_gateway" "igw" {
   tags   = { Name = "eks-igw" }
 }
 
-resource "aws_subnet" "public_subnet" {
-  vpc_id                  = aws_vpc.eks_vpc.id
-  cidr_block              = "10.0.1.0/24"
-  availability_zone       = "us-east-1a"
-  map_public_ip_on_launch = true
-  tags = { Name = "eks-public-subnet" }
+variable "availability_zones" {
+  default = ["us-east-1a", "us-east-1b"]
 }
 
-resource "aws_subnet" "private_subnet" {
-  vpc_id                  = aws_vpc.eks_vpc.id
-  cidr_block              = "10.0.2.0/24"
-  availability_zone       = "us-east-1b"
-  map_public_ip_on_launch = false
-  tags = { Name = "eks-private-subnet" }
+resource "aws_subnet" "public_subnets" {
+  count             = 2
+  vpc_id            = aws_vpc.main.id
+  cidr_block        = cidrsubnet("10.0.0.0/16", 8, count.index)
+  availability_zone = var.availability_zones[count.index]
+  map_public_ip_on_launch = true
 }
+
+resource "aws_subnet" "private_subnets" {
+  count             = 2
+  vpc_id            = aws_vpc.main.id
+  cidr_block        = cidrsubnet("10.0.0.0/16", 8, count.index + 10)
+  availability_zone = var.availability_zones[count.index]
+}
+
 
 resource "aws_eip" "nat_eip" {
   vpc = true
@@ -135,10 +139,13 @@ resource "aws_iam_role_policy_attachment" "eks_registry_policy" {
 resource "aws_eks_cluster" "eks" {
   name     = "my-eks-cluster"
   role_arn = aws_iam_role.eks_cluster_role.arn
+
   vpc_config {
-    subnet_ids = [aws_subnet.private_subnet.id]
-  }
-  depends_on = [aws_iam_role_policy_attachment.eks_cluster_policy]
+    subnet_ids = concat(
+      aws_subnet.public_subnets[*].id,
+      aws_subnet.private_subnets[*].id
+    )
+  } depends_on = [aws_iam_role_policy_attachment.eks_cluster_policy]
 }
 
 resource "aws_eks_node_group" "node_group" {
