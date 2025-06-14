@@ -84,13 +84,47 @@ data "aws_ami" "ubuntu" {
   }
 }
 
+resource "aws_security_group" "ec2_sg" {
+  name        = "eks-admin-sg"
+  description = "Allow SSH and HTTPS"
+  vpc_id      = your_vpc_id_here  # Replace or use data lookup
+
+  ingress {
+    description = "SSH"
+    from_port   = 22
+    to_port     = 22
+    protocol    = "tcp"
+    cidr_blocks = ["0.0.0.0/0"]
+  }
+
+  ingress {
+    description = "HTTPS"
+    from_port   = 443
+    to_port     = 443
+    protocol    = "tcp"
+    cidr_blocks = ["0.0.0.0/0"]
+  }
+
+  egress {
+    from_port   = 0
+    to_port     = 0
+    protocol    = "-1"
+    cidr_blocks = ["0.0.0.0/0"]
+  }
+
+  tags = {
+    Name = "eks-admin-sg"
+  }
+}
+
+
 resource "aws_instance" "eks_admin_ec2" {
   ami                         = data.aws_ami.ubuntu.id
   instance_type               = "t3.micro"
   subnet_id                   = subnet-04d29c00845f2cc04   # change as per your requirement ,public subnet
   associate_public_ip_address = true
   iam_instance_profile        = aws_iam_instance_profile.eks_profile.name
-  key_name                    = key_name = aws_key_pair.generated_key.key_name
+  key_name                    = aws_key_pair.generated_key.key_name
  # Replace with your SSH key
 
   user_data = <<-EOF
