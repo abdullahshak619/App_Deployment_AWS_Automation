@@ -42,7 +42,7 @@ resource "aws_iam_role" "eks_access_role" {
 
 resource "aws_iam_role_policy_attachment" "eks_access_policy_attach" {
   role       = aws_iam_role.eks_access_role.name
-  policy_arn = "arn:aws:iam::aws:policy/AmazonEKSClusterAccess"
+  policy_arn = "arn:aws:iam::aws:policy/AmazonEKSClusterPolicy"
 }
 
 # Optional: Allow reading secrets
@@ -87,7 +87,7 @@ data "aws_ami" "ubuntu" {
 resource "aws_security_group" "ec2_sg" {
   name        = "eks-admin-sg"
   description = "Allow SSH and HTTPS"
-  vpc_id      = "subnet-04d29c00845f2cc04"  # Replace or use data lookup
+  vpc_id      = "vpc-074980b5d9a132964"  # Replace or use data lookup
 
   ingress {
     description = "SSH"
