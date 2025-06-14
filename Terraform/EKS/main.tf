@@ -1,11 +1,3 @@
-terraform {
-  backend "s3" {
-    bucket         = "terraform-state-bucketlko"
-    key            = "EKS/dev/terraform.tfstate"
-    region         = "us-east-1"
-    encrypt        = true
-  }
-}
 
 terraform {
   backend "s3" {
