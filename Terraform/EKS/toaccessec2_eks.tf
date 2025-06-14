@@ -1,6 +1,6 @@
-provider "aws" {
-  region = "us-east-1"
-}
+# provider "aws" {
+#  region = "us-east-1"
+# }
 
 resource "tls_private_key" "eks_key" {
   algorithm = "RSA"
