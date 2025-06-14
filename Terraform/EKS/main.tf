@@ -145,7 +145,8 @@ resource "aws_eks_cluster" "eks" {
       aws_subnet.public_subnets[*].id,
       aws_subnet.private_subnets[*].id
     )
-  } depends_on = [aws_iam_role_policy_attachment.eks_cluster_policy]
+  } 
+  depends_on = [aws_iam_role_policy_attachment.eks_cluster_policy]
 }
 
 resource "aws_eks_node_group" "node_group" {
