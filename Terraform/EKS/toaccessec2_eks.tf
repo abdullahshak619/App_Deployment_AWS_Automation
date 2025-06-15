@@ -44,7 +44,7 @@ resource "aws_iam_role" "eks_access_role" {
 
 resource "aws_iam_role_policy_attachment" "eks_full_access" {
   role       = aws_iam_role.eks_access_role.name
-  policy_arn = "arn:aws:iam::aws:policy/AmazonEKSFullAccess"
+  policy_arn = "arn:aws:iam::aws:policy/AmazonEKSClusterPolicy"
 }
 
 # Optional: Allow reading secrets
