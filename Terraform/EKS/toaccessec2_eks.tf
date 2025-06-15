@@ -159,7 +159,7 @@ resource "aws_instance" "eks_admin_ec2" {
               apt install -y unzip curl jq awscli
 
               # Install kubectl
-              curl -o kubectl https://s3.us-east-1.amazonaws.com/amazon-eks/1.28.2/2023-10-23/bin/linux/amd64/kubectl
+              curl -LO "https://dl.k8s.io/release/$(curl -L -s https://dl.k8s.io/release/stable.txt)/bin/linux/amd64/kubectl"
               chmod +x ./kubectl
               mv ./kubectl /usr/local/bin/
 
