@@ -125,6 +125,8 @@ resource "aws_instance" "eks_admin_ec2" {
   associate_public_ip_address = true
   iam_instance_profile        = aws_iam_instance_profile.eks_profile.name
   key_name                    = aws_key_pair.generated_key.key_name
+  vpc_security_group_ids      = [aws_security_group.ec2_sg.id]
+
  # Replace with your SSH key
 
   user_data = <<-EOF
