@@ -1,0 +1,33 @@
+
+aws eks update-kubeconfig --region us-east-1 --name my-eks-cluster --alias my-eks
+
+# Remove pre-installed AWS CLI v1 if present
+              which aws && rm -rf /usr/bin/aws || true
+
+              # Install AWS CLI v2
+              curl "https://awscli.amazonaws.com/awscli-exe-linux-x86_64.zip" -o "awscliv2.zip"
+              unzip awscliv2.zip
+              ./aws/install --update
+              rm -rf awscliv2.zip aws
+
+              # Verify AWS CLI version
+              aws --version
+  
+
+cat ~/.kube/config 
+
+      apiVersion: client.authentication.k8s.io/v1beta1  # this line
+      args:
+      - --region
+      - us-east-1
+      - eks
+      - get-token
+      - --cluster-name
+      - my-eks-cluster
+      - --output
+      - json
+      command: aws
+
+
+  
+kubectl get nodes --context my-eks
