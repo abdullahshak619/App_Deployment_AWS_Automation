@@ -209,3 +209,32 @@ output "eks_cluster_endpoint" {
 output "eks_node_role_arn" {
   value = aws_iam_role.eks_node_role.arn
 }
+
+
+-----------------------------------------------------------------------------------------------------------------------------
+# -------------------------
+# IAM Access Entry for EKS Authentication
+# -------------------------
+
+# Automatically fetch the current IAM identity (e.g., your CLI or EC2 role)
+data "aws_caller_identity" "current" {}
+
+# Register your IAM identity to the EKS cluster
+resource "aws_eks_access_entry" "eks_admin_access" {
+  cluster_name  = aws_eks_cluster.eks.name
+  principal_arn = data.aws_caller_identity.current.arn
+  type          = "STANDARD"
+}
+
+# Attach AmazonEKSClusterAdminPolicy for full access (maps to system:masters)
+resource "aws_eks_access_policy_association" "eks_admin_policy" {
+  cluster_name  = aws_eks_cluster.eks.name
+  principal_arn = data.aws_caller_identity.current.arn
+  policy_arn    = "arn:aws:eks::aws:cluster-access-policy/AmazonEKSClusterAdminPolicy"
+
+  access_scope {
+    type = "cluster"
+  }
+
+  depends_on = [aws_eks_access_entry.eks_admin_access]
+}
