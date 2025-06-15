@@ -226,14 +226,14 @@ data "aws_caller_identity" "current" {}
 # Register your IAM identity to the EKS cluster
 resource "aws_eks_access_entry" "eks_admin_access" {
   cluster_name  = aws_eks_cluster.eks.name
-  principal_arn = "arn:aws:iam::171171308751:role/github-action"
+  principal_arn = "arn:aws:iam::171171308751:instance-profile/eks-access-instance-profile"
   type          = "STANDARD"
 }
 
 # Attach AmazonEKSClusterAdminPolicy for full access (maps to system:masters)
 resource "aws_eks_access_policy_association" "eks_admin_policy" {
   cluster_name  = aws_eks_cluster.eks.name
-  principal_arn = "arn:aws:iam::171171308751:role/github-action"
+  principal_arn = "arn:aws:iam::171171308751:instance-profile/eks-access-instance-profile"
   policy_arn    = "arn:aws:eks::aws:cluster-access-policy/AmazonEKSClusterAdminPolicy"
 
   access_scope {
