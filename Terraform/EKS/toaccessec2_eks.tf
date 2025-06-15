@@ -47,6 +47,28 @@ resource "aws_iam_role_policy_attachment" "eks_full_access" {
   policy_arn = "arn:aws:iam::aws:policy/AmazonEKSClusterPolicy"
 }
 
+
+resource "aws_iam_policy" "eks_describe_cluster_policy" {
+  name        = "eks-describe-cluster-policy"
+  description = "Allows eks:DescribeCluster for EKS cluster access"
+  policy = jsonencode({
+    Version = "2012-10-17",
+    Statement = [
+      {
+        Effect   = "Allow",
+        Action   = ["eks:DescribeCluster"],
+        Resource = "arn:aws:iam::171171308751:role/eks-cluster-role" #Change your cluster ARN name
+      }
+    ]
+  })
+}
+
+resource "aws_iam_role_policy_attachment" "attach_describe_policy" {
+  role       = aws_iam_role.eks_access_role.name 
+  policy_arn = aws_iam_policy.eks_describe_cluster_policy.arn
+}
+
+
 # Optional: Allow reading secrets
 resource "aws_iam_role_policy_attachment" "secretsmanager_read" {
   role       = aws_iam_role.eks_access_role.name
