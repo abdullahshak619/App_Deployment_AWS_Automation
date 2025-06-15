@@ -57,7 +57,7 @@ resource "aws_iam_policy" "eks_describe_cluster_policy" {
       {
         Effect   = "Allow",
         Action   = ["eks:DescribeCluster"],
-        Resource = "arn:aws:iam::171171308751:role/eks-cluster-role" #Change your cluster ARN name
+        Resource = "arn:aws:eks:us-east-1:171171308751:cluster/my-eks-cluster" # Note its cluster ARM  not IAM  name
       }
     ]
   })
